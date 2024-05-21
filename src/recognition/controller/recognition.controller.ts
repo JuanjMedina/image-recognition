@@ -3,6 +3,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,5 +27,15 @@ export class RecognitionController {
   @Get('image/:word')
   async getImages(@Param('word') word: string) {
     return this.recognitionService.getAllImages(word);
+  }
+
+  @Get('categorys')
+  async getAllCategorys() {
+    return this.recognitionService.getAllCategorys();
+  }
+  @Get('query')
+  getQuery(@Query('categories') query: string) {
+    const categories: string[] = JSON.parse(query);
+    return this.recognitionService.getAllImagesByCategories(categories);
   }
 }

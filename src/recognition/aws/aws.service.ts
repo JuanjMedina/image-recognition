@@ -3,8 +3,9 @@ import { DetectLabelsCommand } from '@aws-sdk/client-rekognition';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+const pathENV = process.env.NODE_ENV.trim();
 ConfigModule.forRoot({
-  envFilePath: '.env',
+  envFilePath: `${pathENV}.env`,
   isGlobal: true,
 });
 
@@ -44,6 +45,34 @@ export class AwsService {
       TableName: configService.get('AWS_DYNAMODB_TABLE_NAME'),
       FilterExpression: 'contains(labels, :label)',
       ExpressionAttributeValues: { ':label': { S: `${word}` } },
+    });
+  }
+
+  getAllDataDynamoDB() {
+    return new ScanCommand({
+      TableName: configService.get('AWS_DYNAMODB_TABLE_NAME'),
+    });
+  }
+
+  getAllImagesByCategories(categories: string[]) {
+    const filterExpressionText = categories
+      .map((category, index) => `contains(labels, :label${index})`)
+      .join(' AND ');
+    const expressionFilterText = categories.reduce(
+      (acc, curr, idx) => ({
+        ...acc,
+        [`:label${idx}`]: {
+          S: `${curr}`,
+        },
+      }),
+      {},
+    );
+    return new ScanCommand({
+      TableName: configService.get('AWS_DYNAMODB_TABLE_NAME'),
+      FilterExpression: filterExpressionText,
+      ExpressionAttributeValues: {
+        ...expressionFilterText,
+      },
     });
   }
 }

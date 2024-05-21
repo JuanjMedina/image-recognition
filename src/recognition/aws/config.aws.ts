@@ -1,8 +1,8 @@
 import { S3ClientConfig } from '@aws-sdk/client-s3';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-
+const pathENV = process.env.NODE_ENV.trim();
 ConfigModule.forRoot({
-  envFilePath: '.env',
+  envFilePath: `${pathENV}.env`,
   isGlobal: true,
 });
 
